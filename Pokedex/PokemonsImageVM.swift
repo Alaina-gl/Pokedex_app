@@ -11,12 +11,16 @@ class PokemonsImageVM {
 
     var url: String
 
-    var currentPokemonImage: Image?
+    var currentPokemon: (name: String, imageUrl: String)?
 
     var pokemons: [(name: String, imageUrl: String)] = []
 
     init(url: String) {
         self.url = url
+    }
+
+    func pokemonTapped(selected: (name: String, imageUrl: String)) {
+        currentPokemon = selected
     }
 
     func fetchPokemons() async {

@@ -12,7 +12,7 @@ struct PokemonsImageView: View {
     private enum Constants {
         static let imageURL = "https://pokeapi.co/api/v2/pokemon?limit=20&offset=10"
     }
-    
+
     let columns = [GridItem(.adaptive(minimum: 90), spacing: 16)]
 
     @State var viewModel = PokemonsImageVM(url: Constants.imageURL)
@@ -21,15 +21,35 @@ struct PokemonsImageView: View {
         NavigationView {
             ScrollView {
                 VStack {
-                    if let topImage = viewModel.currentPokemonImage {
-                        // TODO: add current image selection functionalities
-                    }
+                    currentImage
                     pokemonsGrid
                 }
             }
-            .navigationTitle("Pokemon")
+            .navigationTitle(pokemonTitle)
             .task {
                 await viewModel.fetchPokemons()
+            }
+        }
+    }
+
+    private var pokemonTitle: String {
+        if let pokemon = viewModel.currentPokemon {
+            return pokemon.name
+        } else {
+            return "Pokemon"
+        }
+    }
+
+    @ViewBuilder
+    private var currentImage : some View {
+        if let imageUrl = viewModel.currentPokemon?.imageUrl {
+            AsyncImage(url: URL(string: imageUrl)) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 300)
+            } placeholder: {
+                ProgressView()
             }
         }
     }
@@ -54,6 +74,10 @@ struct PokemonsImageView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(radius: 2)
+                .onTapGesture {
+                    viewModel.pokemonTapped(selected: pokemon)
+                    print("tapped pokemon: \(pokemon.name)")
+                }
             }
         }
         .padding()
