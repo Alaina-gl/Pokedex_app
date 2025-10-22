@@ -6,16 +6,13 @@
 //
 
 import SwiftUI
+import Kingfisher
 
 struct PokemonsImageView: View {
 
-    private enum Constants {
-        static let imageURL = "https://pokeapi.co/api/v2/pokemon?limit=20&offset=10"
-    }
-
     let columns = [GridItem(.adaptive(minimum: 90), spacing: 16)]
 
-    @State var viewModel = PokemonsImageVM(url: Constants.imageURL)
+    @State var viewModel = PokemonsImageVM()
 
     var body: some View {
         NavigationView {
@@ -56,27 +53,33 @@ struct PokemonsImageView: View {
 
     private var pokemonsGrid: some View {
         LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(viewModel.pokemons, id: \.name) { pokemon in
+            ForEach(Array(viewModel.pokemons.enumerated()), id: \.offset) { index, pokemon in
                 VStack {
-                    AsyncImage(url: URL(string: pokemon.imageUrl)) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } placeholder: {
-                        ProgressView()
-                    }
+                    KFImage(URL(string: pokemon.imageUrl))
+                        .resizable()
+                        .scaledToFit()
                     Text(pokemon.name)
                         .font(.caption)
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
+                .frame(maxHeight: .infinity)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(viewModel.currentPokemon?.imageUrl == pokemon.imageUrl ? Color(.systemGray4) : Color(.systemGray6))
                 .cornerRadius(12)
                 .shadow(radius: 2)
                 .onTapGesture {
                     viewModel.pokemonTapped(selected: pokemon)
                     print("tapped pokemon: \(pokemon.name)")
+                }
+                .onAppear {
+                    // start loading when loading the last 3 pokemons requested
+                    if viewModel.pokemons.count >= 3, pokemon == viewModel.pokemons[viewModel.pokemons.count - 3] {
+                        Task {
+                            print("fetching pokemons")
+                            await viewModel.fetchPokemons()
+                        }
+                    }
                 }
             }
         }

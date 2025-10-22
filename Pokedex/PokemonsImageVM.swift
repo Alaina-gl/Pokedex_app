@@ -9,33 +9,43 @@ import SwiftUI
 @Observable @MainActor
 class PokemonsImageVM {
 
-    var url: String
-
     var currentPokemon: (name: String, imageUrl: String)?
 
     var pokemons: [(name: String, imageUrl: String)] = []
 
-    init(url: String) {
-        self.url = url
-    }
+    private var offset = 0
+    private var limit = 20
 
     func pokemonTapped(selected: (name: String, imageUrl: String)) {
         currentPokemon = selected
     }
 
     func fetchPokemons() async {
-        let urlLink = URL(string: url)!
+        let urlLink = URL(string: "https://pokeapi.co/api/v2/pokemon?limit=\(limit)&offset=\(offset)")!
         do {
             let (data, _) = try await URLSession.shared.data(from: urlLink)
             let decodedList = try JSONDecoder().decode(PokemonListResponse.self, from: data)
 
-            for item in decodedList.results {
-                if let details = await fetchPokemonDetail(from: item.url) {
-                    if let imageUrl = details.sprites.front_default {
-                        pokemons.append((item.name.capitalized, imageUrl))
+            await withTaskGroup(of: (String, String)?.self) { group in
+                for item in decodedList.results {
+                    group.addTask {
+                        if let details = await self.fetchPokemonDetail(from: item.url),
+                           let imageUrl = details.sprites.front_default {
+                                return (item.name.capitalized, imageUrl)
+                        }
+                        return nil
+                    }
+                }
+
+                for await result in group {
+                    if let pokemon = result {
+                        self.pokemons.append(pokemon)
                     }
                 }
             }
+            print("increment offset")
+            offset += limit
+
         } catch {
             print("Error fetching Pokemon list: \(error)")
         }
