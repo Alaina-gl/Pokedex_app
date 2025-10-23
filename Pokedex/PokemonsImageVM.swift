@@ -39,7 +39,9 @@ class PokemonsImageVM {
 
                 for await result in group {
                     if let pokemon = result {
-                        self.pokemons.append(pokemon)
+                        await MainActor.run {
+                            self.pokemons.append(pokemon)
+                        }
                     }
                 }
             }
