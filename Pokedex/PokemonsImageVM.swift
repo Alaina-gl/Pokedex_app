@@ -13,8 +13,8 @@ class PokemonsImageVM {
 
     var pokemons: [(name: String, imageUrl: String)] = []
 
-    private var offset = 0
-    private var limit = 20
+    var offset = 0
+    var limit = 20
 
     func pokemonTapped(selected: (name: String, imageUrl: String)) {
         currentPokemon = selected

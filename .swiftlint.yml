@@ -1,0 +1,27 @@
+disabled_rules:
+  - trailing_whitespace
+  - line_length
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+  - closure_spacing
+
+included:
+  - Pokedex
+excluded:
+  - Pods
+
+line_length:
+  warning: 120
+  error: 140
+
+identifier_name:
+  min_length: 3
+  excluded:
+    - id
+    - x
+    - y
+
+type_name:
+  max_length: 50

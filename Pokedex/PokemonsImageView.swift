@@ -38,7 +38,7 @@ struct PokemonsImageView: View {
     }
 
     @ViewBuilder
-    private var currentImage : some View {
+    private var currentImage: some View {
         if let imageUrl = viewModel.currentPokemon?.imageUrl {
             AsyncImage(url: URL(string: imageUrl)) { image in
                 image
@@ -53,7 +53,7 @@ struct PokemonsImageView: View {
 
     private var pokemonsGrid: some View {
         LazyVGrid(columns: columns, spacing: 16) {
-            ForEach(Array(viewModel.pokemons.enumerated()), id: \.offset) { index, pokemon in
+            ForEach(Array(viewModel.pokemons.enumerated()), id: \.offset) { _, pokemon in
                 VStack {
                     KFImage(URL(string: pokemon.imageUrl))
                         .resizable()
